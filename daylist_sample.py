@@ -9,16 +9,15 @@
 
 #0728翌月、前月への切り替え以外は実装したもの
 
+#0728 nonlocalを用いて、翌月・前月への切り替えを実装。
+#前の月のアイテム削除ができていないので要修正
+
 import tkinter as tk
 import datetime
 import sqlite3
 import calendar
 
 day = 0
-global t_year
-t_year= 0
-global t_month
-t_month=0
 
 def immediately(li):
     print(li.curselection())
@@ -129,13 +128,30 @@ def plan_adding(year,month,day):
     button_reg = tk.Button(frame6,text="登録",command=registrate)
     button_reg.pack()
 
-def pre_month(event):
-    print(event.widget["text"])
-def next_month(event):
-    print(event.widget["text"])
-
 def month_calendar(year=datetime.datetime.now().year,month=datetime.datetime.now().month):
+    def pre_month(event):
+        nonlocal year
+        nonlocal month
+        month = month - 1
+        if(month==0):
+            year=year-1
+            month=12
+        current_year["text"]=year
+        current_month["text"]=month
+        create_calendar(year,month)
 
+    def n_month(event):
+        nonlocal year
+        nonlocal month
+        month=month+1
+        if(month==13):
+            year=year+1
+            month=1
+        current_year["text"]=year
+        current_month["text"]=month
+        create_calendar(year,month)
+
+    
     def dcall(event):
         day = event.widget["text"]
         print(day)
@@ -178,14 +194,15 @@ def month_calendar(year=datetime.datetime.now().year,month=datetime.datetime.now
     root.title("%d年%d月 カレンダー"%(year,month))
     frame_top=tk.Frame(root)
     frame_top.pack(pady=5)
-    previous_month=tk.Button(frame_top,text="<",font=("",14))
+    previous_month=tk.Label(frame_top,text="<",font=("",14))
     previous_month.bind("<1>",pre_month)
     previous_month.pack(side="left",padx=10)
     current_year=tk.Label(frame_top,text=year,font=("",18))
     current_year.pack(side="left")
     current_month=tk.Label(frame_top,text=month,font=("",18))
-    next_month=tk.Button(frame_top,text=">",font=("",14))
-    next_month.bind("<1>",next_month)
+    current_month.pack(side="left")
+    next_month=tk.Label(frame_top,text=">",font=("",14))
+    next_month.bind("<1>",n_month)
     next_month.pack(side="left",padx=10)
 
     frame_week=tk.Frame(root)
